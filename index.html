@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Warga Negara - Media Pembelajaran Interaktif SMP Kelas IX</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#E53E3E',
+                            darkred: '#9B2C2C',
+                            blue: '#3182CE',
+                            gold: '#ECC94B',
+                            green: '#38A169',
+                            purple: '#805AD5',
+                            dark: '#1A202C'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 flex justify-center min-h-screen items-center p-0 md:p-4">
+
+    <!-- APP CONTAINER (MOBILE FRAME) -->
+    <div id="app" class="w-full max-w-md h-screen md:h-[844px] bg-slate-100 md:rounded-[36px] shadow-2xl flex flex-col relative overflow-hidden border-0 md:border-[8px] border-slate-800">
+
+        <!-- HEADER STATUS BAR -->
+        <header class="bg-gradient-to-r from-red-600 to-red-800 text-white p-3 pt-4 flex flex-col gap-2 shadow-md shrink-0 z-20">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center text-red-900 font-extrabold text-sm shadow" id="profile-avatar">
+                        🧙‍♂️
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-sm leading-tight tracking-wide" id="user-name-display">Petualang Muda</h2>
+                        <p class="text-[10px] text-amber-200 font-bold" id="user-title-display">Level 1: Pemula Warga Negara</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <div class="bg-red-900/60 px-2.5 py-1 rounded-full border border-red-400/30 flex items-center gap-1 font-bold">
+                        <span>🔥</span> <span id="streak-count" class="text-amber-300">1</span>
+                    </div>
+                    <div class="bg-red-900/60 px-2.5 py-1 rounded-full border border-red-400/30 flex items-center gap-1 font-bold">
+                        <span>⭐</span> <span id="user-xp" class="text-amber-300">0</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Progress Bar Level -->
+            <div class="w-full bg-red-950/50 rounded-full h-2 overflow-hidden p-0.5 border border-red-400/20">
+                <div id="level-progress-bar" class="bg-gradient-to-r from-amber-400 to-amber-200 h-full rounded-full transition-all duration-500" style="width: 10%"></div>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW CONTAINER -->
+        <main id="main-content" class="flex-1 overflow-y-auto hide-scrollbar p-4 relative bg-slate-50 flex flex-col">
+            <!-- Dynamic Content Injected via JS -->
+        </main>
+
+        <!-- MODAL OVERLAY FOR FEEDBACK / DIALOGS -->
+        <div id="modal-container" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div id="modal-content" class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center transform transition-all flex flex-col gap-3">
+                <!-- Modal dynamic body -->
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="bg-white border-t border-slate-200 px-3 py-2 flex justify-around items-center shrink-0 z-20 shadow-lg text-xs">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 text-red-600 font-bold transition-all">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px]">Utama</span>
+            </button>
+            <button onclick="switchTab('map')" id="nav-map" class="flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-red-600 transition-all">
+                <i class="fa-solid fa-map-location-dot text-lg"></i>
+                <span class="text-[10px]">Peta</span>
+            </button>
+            <button onclick="switchTab('games')" id="nav-games" class="flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-red-600 transition-all">
+                <i class="fa-solid fa-gamepad text-lg"></i>
+                <span class="text-[10px]">Permainan</span>
+            </button>
+            <button onclick="switchTab('materi')" id="nav-materi" class="flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-red-600 transition-all">
+                <i class="fa-solid fa-book-open text-lg"></i>
+                <span class="text-[10px]">Materi</span>
+            </button>
+            <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-red-600 transition-all">
+                <i class="fa-solid fa-trophy text-lg"></i>
+                <span class="text-[10px]">Prestasi</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & STATE MANAGEMENT -->
+    <script>
+        // ==========================================
+        // DATA STATE & STORAGE
+        // ==========================================
+        let gameState = {
+            name: "Petualang Muda",
+            xp: 0,
+            level: 1,
+            streak: 1,
+            currentMapLevel: 1,
+            unlockedLevels: [1],
+            badges: [],
+            reflectionAnswers: {},
+            gameStats: {
+                correct: 0,
+                wrong: 0,
+                gamesPlayed: 0
+            }
+        };
+
+        const LEVEL_TITLES = {
+            1: "Pemula Warga Negara",
+            2: "Pelajar Bertanggung Jawab",
+            3: "Sahabat Masyarakat",
+            4: "Pejuang Konstitusi",
+            5: "Detektif Hak & Kewajiban",
+            6: "Warga Negara Cerdas",
+            7: "Warga Negara Teladan"
+        };
+
+        const MAP_LEVELS = [
+            { id: 1, name: "Sekolah", theme: "Hak & Kewajibanku sebagai Pelajar", icon: "🏫", minXp: 0, bg: "bg-blue-500" },
+            { id: 2, name: "Keluarga", theme: "Hak & Kewajibanku di Rumah", icon: "🏠", minXp: 150, bg: "bg-emerald-500" },
+            { id: 3, name: "Masyarakat", theme: "Menjadi Warga Negara Bertanggung Jawab", icon: "🌳", minXp: 350, bg: "bg-amber-500" },
+            { id: 4, name: "Pulau UUD 1945", theme: "Kenali Hak & Kewajiban Konstitusi", icon: "📜", minXp: 600, bg: "bg-purple-500" },
+            { id: 5, name: "Dunia Digital", theme: "Bijak Menggunakan Hak di Era Digital", icon: "🌐", minXp: 900, bg: "bg-cyan-500" },
+            { id: 6, name: "Zona Keseimbangan", theme: "Seimbangkan Hak dan Kewajiban", icon: "⚖️", minXp: 1300, bg: "bg-rose-500" },
+            { id: 7, name: "Warga Negara Teladan", theme: "Final Mission: Tantangan Kebangsaan", icon: "🏆", minXp: 1800, bg: "bg-yellow-500" }
+        ];
+
+        // Load State from LocalStorage
+        function loadState() {
+            const saved = localStorage.getItem('petualang_warga_negara_save');
+            if (saved) {
+                try {
+                    gameState = { ...gameState, ...JSON.parse(saved) };
+                } catch(e) { console.error("Save state corrupt"); }
+            }
+            updateHeaderUI();
+        }
+
+        function saveState() {
+            localStorage.setItem('petualang_warga_negara_save', JSON.stringify(gameState));
+            updateHeaderUI();
+        }
+
+        function addXP(amount) {
+            gameState.xp += amount;
+            
+            // Check Level Progression
+            MAP_LEVELS.forEach(lvl => {
+                if (gameState.xp >= lvl.minXp && !gameState.unlockedLevels.includes(lvl.id)) {
+                    gameState.unlockedLevels.push(lvl.id);
+                    showModal("🔓 LEVEL BARU TERBUKA!", `Selamat! Kamu berhasil membuka area <b>${lvl.name}</b>!`, " Mantap!");
+                }
+            });
+
+            // Update Current Level Index
+            let newLevel = 1;
+            MAP_LEVELS.forEach(lvl => {
+                if (gameState.xp >= lvl.minXp) newLevel = lvl.id;
+            });
+            gameState.level = newLevel;
+
+            saveState();
+        }
+
+        function updateHeaderUI() {
+            document.getElementById('user-name-display').innerText = gameState.name;
+            document.getElementById('user-title-display').innerText = `Lvl ${gameState.level}: ${LEVEL_TITLES[gameState.level]}`;
+            document.getElementById('user-xp').innerText = gameState.xp;
+            document.getElementById('streak-count').innerText = gameState.streak;
+
+            // Bar Progress
+            const nextLvl = MAP_LEVELS.find(l => l.id === gameState.level + 1);
+            const currentLvlData = MAP_LEVELS.find(l => l.id === gameState.level);
+            let pct = 100;
+            if (nextLvl) {
+                const baseXP = currentLvlData.minXp;
+                const targetXP = nextLvl.minXp;
+                pct = Math.min(100, Math.max(5, Math.round(((gameState.xp - baseXP) / (targetXP - baseXP)) * 100)));
+            }
+            document.getElementById('level-progress-bar').style.width = pct + '%';
+        }
+
+        // NAVIGATION LOGIC
+        function switchTab(tab) {
+            // Highlight nav button
+            ['home', 'map', 'games', 'materi', 'profile'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    btn.className = "flex flex-col items-center gap-1 text-red-600 font-bold transition-all";
+                } else {
+                    btn.className = "flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-red-600 transition-all";
+                }
+            });
+
+            const content = document.getElementById('main-content');
+            content.scrollTop = 0;
+
+            switch(tab) {
+                case 'home': renderHome(); break;
+                case 'map': renderMap(); break;
+                case 'games': renderGameHub(); break;
+                case 'materi': renderMateri(); break;
+                case 'profile': renderProfile(); break;
+            }
+        }
+
+        // ==========================================
+        // VIEW RENDERERS
+        // ==========================================
+
+        // 1. HOME VIEW
+        function renderHome() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-4">
+                    <!-- Hero Banner -->
+                    <div class="bg-gradient-to-br from-red-600 via-red-700 to-red-900 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute -right-6 -bottom-6 opacity-20 text-9xl">🇮🇩</div>
+                        <div>
+                            <span class="bg-amber-400 text-red-950 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Pendidikan Pancasila Kelas IX</span>
+                            <h1 class="text-xl font-extrabold mt-2 leading-tight">PETUALANGAN WARGA NEGARA</h1>
+                            <p class="text-xs text-red-100 mt-1 opacity-90">Belajar, Bermain, Berpikir, & Menjadi Warga Negara Cerdas</p>
+                        </div>
+                        <div class="mt-5 flex gap-2">
+                            <button onclick="switchTab('map')" class="flex-1 bg-amber-400 hover:bg-amber-300 text-red-950 font-extrabold py-2.5 px-4 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 pulse-animation">
+                                <i class="fa-solid fa-play"></i> Mulai Petualangan
+                            </button>
+                            <button onclick="startMicrolearning(gameState.level)" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2.5 px-3 rounded-xl text-xs backdrop-blur-sm transition-all">
+                                <i class="fa-solid fa-book-open"></i> Materi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Misi Harian Card -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-xs text-slate-800 flex items-center gap-2">
+                                <span class="text-base">🎯</span> Misi Harian Kamu
+                            </h3>
+                            <span class="text-[10px] text-amber-600 bg-amber-50 font-extrabold px-2 py-0.5 rounded-full border border-amber-200">+50 XP</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg font-bold">
+                                    🔍
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-800">Selesaikan 1 Kasus Detektif</h4>
+                                    <p class="text-[10px] text-slate-500">Analisis masalah hak & kewajiban</p>
+                                </div>
+                            </div>
+                            <button onclick="launchGame('detektif')" class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow hover:bg-blue-700 transition">
+                                Main
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Game Choices -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <h3 class="font-bold text-xs text-slate-700">Pilihan Permainan Cepat</h3>
+                            <button onclick="switchTab('games')" class="text-[11px] font-bold text-red-600">Lihat Semua</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div onclick="launchGame('kuis_cepat')" class="bg-gradient-to-br from-amber-500 to-amber-600 p-3.5 rounded-2xl text-white shadow-sm cursor-pointer hover:scale-95 transition-all">
+                                <div class="text-2xl mb-1">⏱️</div>
+                                <h4 class="font-bold text-xs">Kuis Cepat</h4>
+                                <p class="text-[10px] text-amber-100 mt-0.5">Uji kecepatan pemahaman</p>
+                            </div>
+                            <div onclick="launchGame('tebak_gambar')" class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3.5 rounded-2xl text-white shadow-sm cursor-pointer hover:scale-95 transition-all">
+                                <div class="text-2xl mb-1">🖼️</div>
+                                <h4 class="font-bold text-xs">Tebak Gambar</h4>
+                                <p class="text-[10px] text-emerald-100 mt-0.5">Analisis situasi nyata</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Nilai Pancasila -->
+                    <div class="bg-red-50 rounded-2xl p-4 border border-red-100 text-xs">
+                        <h4 class="font-bold text-red-900 flex items-center gap-1.5 mb-1">
+                            <span>⚖️</span> Kunci Keseimbangan
+                        </h4>
+                        <p class="text-red-700/90 text-[11px] leading-relaxed">
+                            "Menuntut <b>HAK</b> tanpa menunaikan <b>KEWAJIBAN</b> memicu ketimpangan sosial. Jadilah warga negara cerdas yang seimbang!"
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. MAP VIEW (7 LEVELS)
+        function renderMap() {
+            let mapHTML = `
+                <div class="flex flex-col gap-3 py-2">
+                    <div class="text-center mb-2">
+                        <h2 class="font-extrabold text-slate-800 text-base">PETA PETUALANGAN WARGA NEGARA</h2>
+                        <p class="text-slate-500 text-[11px]">Jelajahi 7 Wilayah & Kuasai Materi Hak & Kewajiban</p>
+                    </div>
+                    <div class="flex flex-col gap-4 relative px-4">
+                        <!-- Line connecting levels -->
+                        <div class="absolute left-1/2 top-8 bottom-8 w-1.5 bg-slate-200 -translate-x-1/2 z-0"></div>
+            `;
+
+            MAP_LEVELS.slice().reverse().forEach((lvl) => {
+                const isUnlocked = gameState.unlockedLevels.includes(lvl.id);
+                const isCurrent = gameState.level === lvl.id;
+
+                mapHTML += `
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div onclick="${isUnlocked ? `startLevelJourney(${lvl.id})` : `showModal('🔒 Terkunci', 'Kumpulkan minimal ${lvl.minXp} XP untuk membuka wilayah ini!', 'Siap!')`}" 
+                             class="w-full bg-white rounded-2xl p-4 shadow-sm border-2 ${isCurrent ? 'border-red-500 ring-4 ring-red-100' : (isUnlocked ? 'border-slate-200' : 'border-slate-100 opacity-75')} transition-all cursor-pointer flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl ${isUnlocked ? lvl.bg : 'bg-slate-300'} text-white flex items-center justify-center text-2xl shadow shrink-0">
+                                ${isUnlocked ? lvl.icon : '🔒'}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <span class="text-[10px] font-extrabold ${isUnlocked ? 'text-red-600' : 'text-slate-400'} uppercase">WILAYAH ${lvl.id}</span>
+                                    ${isCurrent ? '<span class="bg-red-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full">LOKASI KAMU</span>' : ''}
+                                </div>
+                                <h3 class="font-bold text-xs text-slate-800 truncate">${lvl.name}</h3>
+                                <p class="text-[10px] text-slate-500 truncate">${lvl.theme}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            mapHTML += `</div></div>`;
+            document.getElementById('main-content').innerHTML = mapHTML;
+        }
+
+        // Start Level Journey Flow: Microlearning -> Game
+        function startLevelJourney(levelId) {
+            gameState.currentMapLevel = levelId;
+            startMicrolearning(levelId);
+        }
+
+        // 3. GAME HUB VIEW (15 MINI GAMES)
+        function renderGameHub() {
+            const games = [
+                { id: 'detektif', name: 'Detektif Hak & Kewajiban', desc: 'Analisis Kasus HOTS Nyata', icon: '🔎', color: 'bg-indigo-500' },
+                { id: 'tebak_gambar', name: 'Tebak Gambar Situasi', desc: 'Identifikasi Hak vs Kewajiban', icon: '🖼️', color: 'bg-emerald-500' },
+                { id: 'pasangkan_pasal', name: 'Pasangkan Pasal UUD', desc: 'Jodohkan Pasal & Isinya', icon: '📜', color: 'bg-purple-500' },
+                { id: 'benar_salah', name: 'Benar atau Salah', desc: 'Uji Fakta Konstitusi Cepat', icon: '⚖️', color: 'bg-rose-500' },
+                { id: 'susun_kalimat', name: 'Susun Kalimat Norma', desc: 'Rangkai Kata Jadi Prinsip', icon: '🧩', color: 'bg-amber-500' },
+                { id: 'simulasi', name: 'Simulasi Kehidupan', desc: 'Pilihan Keputusan Warga Negara', icon: '🎭', color: 'bg-blue-500' },
+                { id: 'kuis_cepat', name: 'Kuis Cepat Pacu Waktu', desc: 'Jawab Soal Sebelum Waktu Habis', icon: '⏱️', color: 'bg-red-500' },
+                { id: 'tts', name: 'Teka-Teki Silang (TTS)', desc: 'Asah Istilah Pendidikan Pancasila', icon: '✏️', color: 'bg-teal-500' }
+            ];
+
+            let html = `
+                <div class="flex flex-col gap-3">
+                    <div class="mb-1">
+                        <h2 class="font-extrabold text-slate-800 text-base">HUB PERMAINAN INTERAKTIF</h2>
+                        <p class="text-slate-500 text-[11px]">Pilih mode permainan untuk menambah XP dan menguasai materi</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+            `;
+
+            games.forEach(g => {
+                html += `
+                    <div onclick="launchGame('${g.id}')" class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/80 flex items-center justify-between cursor-pointer hover:border-red-400 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl ${g.color} text-white flex items-center justify-center text-xl shadow">
+                                ${g.icon}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-800">${g.name}</h4>
+                                <p class="text-[10px] text-slate-500">${g.desc}</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-300"><i class="fa-solid fa-chevron-right text-xs"></i></span>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            document.getElementById('main-content').innerHTML = html;
+        }
+
+        // 4. MICROLEARNING MODULE
+        const MICRO_MATERI = {
+            1: [
+                { title: "Hak di Sekolah", desc: "Setiap siswa berhak mendapatkan bimbingan dari guru, fasiltas belajar yang layak, serta rasa aman saat menuntut ilmu." },
+                { title: "Kewajiban di Sekolah", desc: "Kewajiban siswa meliputi mematuhi tata tertib, memelihara kebersihan kelas, menghormati guru, dan belajar dengan sungguh-sungguh." }
+            ],
+            2: [
+                { title: "Hak di Rumah", desc: "Anak berhak mendapatkan kasih sayang, perlindungan orang tua, pemenuhan kebutuhan dasar, dan hak didengar pendapatnya." },
+                { title: "Kewajiban di Rumah", desc: "Kewajiban anak adalah membantu orang tua, menjaga nama baik keluarga, serta menghormati seluruh anggota keluarga." }
+            ],
+            3: [
+                { title: "Tanggung Jawab Masyarakat", desc: "Di lingkungan warga, kita wajib menjaga ketertiban, bergotong royong, menghormati tetangga, dan menjaga kelestarian lingkungan." }
+            ],
+            4: [
+                { title: "UUD NRI Tahun 1945", desc: "Pasal 27 ayat (1) mengatur kesamaan di depan hukum. Pasal 27 ayat (2) mengatur hak atas pekerjaan & penghidupan layak. Pasal 31 mengatur hak pendidikan." }
+            ],
+            5: [
+                { title: "Hak & Etika Digital", desc: "Kita berhak mengemukakan pendapat di media sosial, namun wajib tidak menyebarkan hoax, menghormati privasi, serta menghindari cyberbullying." }
+            ],
+            6: [
+                { title: "Zona Keseimbangan", desc: "Hak dan kewajiban harus berjalan seimbang. Menuntut hak tanpa kewajiban adalah tindakan egois yang merugikan orang lain." }
+            ],
+            7: [
+                { title: "Warga Negara Teladan", desc: "Menjadi warga negara teladan berarti aktif berkontribusi, taat hukum, bertoleransi, dan siap membela negara secara positif." }
+            ]
+        };
+
+        function startMicrolearning(levelId) {
+            const materiList = MICRO_MATERI[levelId] || MICRO_MATERI[1];
+            let currentCard = 0;
+
+            function renderCard() {
+                const item = materiList[currentCard];
+                document.getElementById('main-content').innerHTML = `
+                    <div class="flex flex-col h-full justify-between py-2">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                    📚 MICROLEARNING LEVEL ${levelId}
+                                </span>
+                                <span class="text-xs font-bold text-slate-400">${currentCard + 1} / ${materiList.length}</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 text-center flex flex-col items-center gap-4 my-4">
+                                <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl">
+                                    💡
+                                </div>
+                                <h3 class="font-extrabold text-base text-slate-800">${item.title}</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            ${currentCard < materiList.length - 1 ? `
+                                <button id="next-card-btn" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl text-xs shadow hover:bg-red-700 transition">
+                                    Kartu Berikutnya ➡️
+                                </button>
+                            ` : `
+                                <button id="finish-materi-btn" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs shadow hover:bg-emerald-700 transition">
+                                     Saya Sudah Paham! Mulai Game ▶
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+
+                if (document.getElementById('next-card-btn')) {
+                    document.getElementById('next-card-btn').onclick = () => { currentCard++; renderCard(); };
+                }
+                if (document.getElementById('finish-materi-btn')) {
+                    document.getElementById('finish-materi-btn').onclick = () => { launchGame('detektif'); };
+                }
+            }
+
+            renderCard();
+        }
+
+        function renderMateri() {
+            let html = `
+                <div class="flex flex-col gap-3">
+                    <div class="mb-1">
+                        <h2 class="font-extrabold text-slate-800 text-base">RINGKASAN BUKU SAKU MATERI</h2>
+                        <p class="text-slate-500 text-[11px]">Bab 2: Hak dan Kewajiban Warga Negara (Kelas IX)</p>
+                    </div>
+            `;
+
+            Object.keys(MICRO_MATERI).forEach(lvl => {
+                const items = MICRO_MATERI[lvl];
+                html += `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-xs text-red-600 mb-2 flex items-center gap-1.5">
+                            <span>📖</span> Level ${lvl}: ${MAP_LEVELS.find(m => m.id == lvl)?.name}
+                        </h4>
+                        <div class="flex flex-col gap-2">
+                            ${items.map(it => `
+                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                    <h5 class="font-bold text-[11px] text-slate-800">${it.title}</h5>
+                                    <p class="text-[10px] text-slate-600 mt-0.5">${it.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            document.getElementById('main-content').innerHTML = html;
+        }
+
+        // 5. PROFILE & REFLECTION VIEW
+        function renderProfile() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-4">
+                    <!-- User Info Card -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center text-3xl shadow">
+                            🧙‍♂️
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-sm text-slate-800">${gameState.name}</h3>
+                            <p class="text-xs text-red-600 font-bold">${LEVEL_TITLES[gameState.level]}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Total XP: <b>${gameState.xp}</b> | Streak: <b>${gameState.streak} Hari</b></p>
+                        </div>
+                    </div>
+
+                    <!-- Statistik Belajar -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-xs text-slate-800 mb-3 flex items-center gap-1.5">
+                            📊 Statistik Permainan
+                        </h4>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <span class="text-xs text-slate-400 font-bold block">Selesai</span>
+                                <span class="text-sm font-extrabold text-blue-600">${gameState.gameStats.gamesPlayed}</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <span class="text-xs text-slate-400 font-bold block">Benar</span>
+                                <span class="text-sm font-extrabold text-emerald-600">${gameState.gameStats.correct}</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <span class="text-xs text-slate-400 font-bold block">Salah</span>
+                                <span class="text-sm font-extrabold text-rose-600">${gameState.gameStats.wrong}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Refleksi Diri Form -->
+                    <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                        <h4 class="font-bold text-xs text-amber-900 mb-1 flex items-center gap-1.5">
+                            💭 Refleksi Warga Negara
+                        </h4>
+                        <p class="text-[10px] text-amber-700 mb-3">Apa komitmenmu sebagai warga negara muda hari ini?</p>
+                        <textarea id="reflection-input" placeholder="Tuliskan tindakan nyata keseimbangan hak & kewajibanmu..." class="w-full text-xs p-2.5 rounded-xl border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 h-20 bg-white"></textarea>
+                        <button onclick="saveReflection()" class="mt-2 w-full bg-amber-500 text-white font-bold text-xs py-2 rounded-xl hover:bg-amber-600 transition shadow">
+                            Simpan Komitmen
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveReflection() {
+            const val = document.getElementById('reflection-input').value.trim();
+            if (val) {
+                gameState.reflectionAnswers[Date.now()] = val;
+                addXP(30);
+                showModal("🌟 Refleksi Tersimpan!", "Komitmenmu luar biasa. +30 XP diberikan!", "Siap!");
+                document.getElementById('reflection-input').value = "";
+            }
+        }
+
+        // ==========================================
+        // MINI GAME ENGINES & SAMPLE DATA
+        // ==========================================
+
+        function launchGame(gameType) {
+            gameState.gameStats.gamesPlayed++;
+            saveState();
+
+            switch(gameType) {
+                case 'detektif': playDetektif(); break;
+                case 'tebak_gambar': playTebakGambar(); break;
+                case 'pasangkan_pasal': playPasangkanPasal(); break;
+                case 'benar_salah': playBenarSalah(); break;
+                case 'susun_kalimat': playSusunKalimat(); break;
+                case 'kuis_cepat': playKuisCepat(); break;
+                case 'tts': playTTS(); break;
+                default: playDetektif(); break;
+            }
+        }
+
+        // GAME 1: DETEKTIF HAK & KEWAJIBAN (HOTS)
+        const DETEKTIF_KASUS = [
+            {
+                kasus: "Di sekolah, Andi sangat menginginkan kelas yang bersih dan nyaman saat belajar. Namun, Andi selalu menolak ketika tiba jadwal piket kebersihannya.",
+                masalah: "Ketidakseimbangan antara menuntut hak kelas bersih dengan menolak kewajiban piket.",
+                opsi: [
+                    { text: "Andi menuntut haknya tetapi mengabaikan kewajibannya.", correct: true },
+                    { text: "Andi sudah menjalankan kewajiban dengan baik.", correct: false },
+                    { text: "Piket adalah hak Andi, bukan kewajiban.", correct: false }
+                ],
+                penjelasan: "Mendapatkan kelas bersih adalah HAK, sedangkan piket kelas adalah KEWAJIBAN. Keduanya harus seimbang!"
+            },
+            {
+                kasus: "Siti ingin menyuarakan pendapatnya mengenai aturan OSIS di media sosial, namun ia menggunakan kata-kata kasar dan menghina pengurus OSIS.",
+                masalah: "Penyalahgunaan hak kebebasan berpendapat tanpa memperhatikan kewajiban menjaga etika.",
+                opsi: [
+                    { text: "Siti melanggar kewajiban menghormati etika dan hak orang lain.", correct: true },
+                    { text: "Tindakan Siti sepenuhnya benar karena kebebasan berpendapat mutlak.", correct: false },
+                    { text: "OSIS tidak punya hak untuk dihormati.", correct: false }
+                ],
+                penjelasan: "Pasal 28J UUD 1945 menegaskan bahwa pelaksanaan hak wajib menghormati hak dan kebebasan orang lain."
+            }
+        ];
+
+        function playDetektif() {
+            const data = DETEKTIF_KASUS[Math.floor(Math.random() * DETEKTIF_KASUS.length)];
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-indigo-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs flex items-center gap-2">🔎 DETEKTIF HAK & KEWAJIBAN</span>
+                        <span class="bg-indigo-700 text-indigo-200 text-[10px] font-bold px-2 py-0.5 rounded-full">HOTS</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-xs text-slate-500 mb-1">📜 BUKTI KASUS:</h4>
+                        <p class="text-xs text-slate-800 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">${data.kasus}</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-xs text-indigo-900 mb-2">🧠 ANALISIS DETEKTIF:</h4>
+                        <p class="text-xs font-semibold text-slate-700 mb-3">Manakah analisis kesimpulan yang paling tepat?</p>
+                        
+                        <div class="flex flex-col gap-2">
+                            ${data.opsi.map((op, idx) => `
+                                <button onclick="checkDetektif(${op.correct}, '${encodeURIComponent(data.penjelasan)}')" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-indigo-500 text-xs text-slate-700 font-medium transition-all bg-slate-50 hover:bg-indigo-50">
+                                    ${op.text}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkDetektif(isCorrect, explanation) {
+            const exp = decodeURIComponent(explanation);
+            if (isCorrect) {
+                gameState.gameStats.correct++;
+                addXP(30);
+                confetti({ particleCount: 50, spread: 60 });
+                showModal("🎉 ANALISIS TEPAT!", `+30 XP!<br><br><span class="text-xs text-slate-600">${exp}</span>`, "Lanjut");
+            } else {
+                gameState.gameStats.wrong++;
+                saveState();
+                showModal("💡 KURANG TEPAT", `Yuk pelajari lagi:<br><br><span class="text-xs text-slate-600">${exp}</span>`, "Coba Lagi");
+            }
+            switchTab('games');
+        }
+
+        // GAME 2: TEBAK GAMBAR
+        const TEBAK_DATA = [
+            { icon: "🧹", text: "Siswa sedang membersihkan lingkungan sekolah bersama-sama saat piket.", answer: "Kewajiban", options: ["Hak", "Kewajiban", "Pelanggaran Hak"] },
+            { icon: "📚", text: "Mendapatkan fasilitas buku dan ruang perpustakaan yang nyaman.", answer: "Hak", options: ["Hak", "Kewajiban", "Pengingkaran Kewajiban"] }
+        ];
+
+        function playTebakGambar() {
+            const item = TEBAK_DATA[Math.floor(Math.random() * TEBAK_DATA.length)];
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-emerald-800 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">🖼️ TEBAK GAMBAR & SITUASI</span>
+                        <span class="bg-emerald-600 text-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded-full">+15 XP</span>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center flex flex-col items-center gap-3">
+                        <div class="w-24 h-24 rounded-2xl bg-emerald-100 flex items-center justify-center text-6xl shadow-inner">
+                            ${item.icon}
+                        </div>
+                        <p class="text-xs text-slate-700 font-medium">${item.text}</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-xs text-slate-800 mb-3 text-center">Situasi di atas menggambarkan...</h4>
+                        <div class="grid grid-cols-1 gap-2">
+                            ${item.options.map(opt => `
+                                <button onclick="checkTebak('${opt}', '${item.answer}')" class="w-full py-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-500 rounded-xl font-bold text-xs text-slate-700 transition">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkTebak(userAns, rightAns) {
+            if (userAns === rightAns) {
+                gameState.gameStats.correct++;
+                addXP(15);
+                confetti({ particleCount: 30 });
+                showModal("🎉 JAWABAN BENAR!", "Hebat, kamu mengenali situasi ini dengan tepat. +15 XP", "Lanjut");
+            } else {
+                gameState.gameStats.wrong++;
+                saveState();
+                showModal("❌ KURANG TEPAT", `Jawaban yang tepat adalah: <b>${rightAns}</b>`, "Lanjut");
+            }
+            switchTab('games');
+        }
+
+        // GAME 3: PASANGKAN PASAL UUD 1945
+        function playPasangkanPasal() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-purple-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">📜 PASANGKAN PASAL UUD 1945</span>
+                        <span class="bg-purple-700 text-purple-200 text-[10px] font-bold px-2 py-0.5 rounded-full">+20 XP</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-600 mb-3">Pilih Pasal di sebelah kiri, lalu pilih isi substansinya di sebelah kanan!</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex flex-col gap-2">
+                                <button onclick="selectPasal(this, '31')" class="pasal-btn p-3 bg-purple-50 border border-purple-200 rounded-xl font-extrabold text-purple-900 text-center">
+                                    Pasal 31 Ayat (1)
+                                </button>
+                                <button onclick="selectPasal(this, '27')" class="pasal-btn p-3 bg-purple-50 border border-purple-200 rounded-xl font-extrabold text-purple-900 text-center">
+                                    Pasal 27 Ayat (1)
+                                </button>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="selectIsi(this, '27')" class="isi-btn p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-700">
+                                    Kesamaan kedudukan dalam hukum dan pemerintahan.
+                                </button>
+                                <button onclick="selectIsi(this, '31')" class="isi-btn p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-700">
+                                    Setiap warga negara berhak mendapat pendidikan.
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let selectedPasalId = null;
+        function selectPasal(btn, id) {
+            document.querySelectorAll('.pasal-btn').forEach(b => b.classList.remove('ring-2', 'ring-purple-600'));
+            btn.classList.add('ring-2', 'ring-purple-600');
+            selectedPasalId = id;
+        }
+
+        function selectIsi(btn, id) {
+            if (!selectedPasalId) {
+                showModal("⚠️ Pilih Pasal dulu!", "Ketuk salah satu tombol pasal di sebelah kiri terlebih dahulu.", "Paham");
+                return;
+            }
+            if (selectedPasalId === id) {
+                gameState.gameStats.correct++;
+                addXP(20);
+                confetti({ particleCount: 40 });
+                showModal("🎉 PASANGAN COCOK!", "Analisis konstitusimu sangat baik! +20 XP", "Lanjut");
+                switchTab('games');
+            } else {
+                gameState.gameStats.wrong++;
+                saveState();
+                showModal("❌ BELUM COCOK", "Pasal dan substansi isi tidak sesuai. Coba lagi!", "Coba Lagi");
+            }
+            selectedPasalId = null;
+        }
+
+        // GAME 4: BENAR ATAU SALAH
+        function playBenarSalah() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-rose-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">⚖️ BENAR ATAU SALAH</span>
+                        <span class="bg-rose-700 text-rose-200 text-[10px] font-bold px-2 py-0.5 rounded-full">+10 XP</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <span class="text-xs font-extrabold text-rose-600 uppercase tracking-wider">PERNYATAAN:</span>
+                        <p class="text-sm font-bold text-slate-800 my-4 leading-relaxed">
+                            "Hak warga negara dapat dituntut secara mutlak tanpa perlu memperhatikan kewajiban, karena hak dijamin oleh undang-undang."
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="checkBS(true)" class="py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow transition">
+                            ✅ BENAR
+                        </button>
+                        <button onclick="checkBS(false)" class="py-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-2xl shadow transition">
+                            ❌ SALAH
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkBS(userChoice) {
+            // Correct Answer is FALSE
+            if (userChoice === false) {
+                gameState.gameStats.correct++;
+                addXP(10);
+                confetti({ particleCount: 30 });
+                showModal("🎉 JAWABAN BENAR!", "Tepat sekali! Hak tidak bersifat mutlak karena dibatasi oleh hak orang lain dan diimbangi oleh kewajiban. +10 XP", "Mantap");
+            } else {
+                gameState.gameStats.wrong++;
+                saveState();
+                showModal("❌ SALAH", "Pernyataan tersebut SALAH. Hak dan kewajiban harus dilaksanakan secara seimbang.", "Paham");
+            }
+            switchTab('games');
+        }
+
+        // GAME 5: SUSUN KALIMAT
+        function playSusunKalimat() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-amber-800 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">🧩 SUSUN KALIMAT NORMA</span>
+                        <span class="bg-amber-600 text-amber-100 text-[10px] font-bold px-2 py-0.5 rounded-full">+15 XP</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-h-[80px] flex flex-wrap gap-1.5 items-center" id="sentence-target">
+                        <!-- Placed words go here -->
+                        <span class="text-xs text-slate-400 italic" id="placeholder-text">Ketuk kata-kata di bawah untuk menyusun kalimat...</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex flex-wrap gap-2" id="word-pool">
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">seimbang</button>
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">Hak</button>
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">dan</button>
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">kewajiban</button>
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">harus</button>
+                            <button onclick="moveWord(this)" class="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl font-bold text-xs">dilaksanakan</button>
+                        </div>
+                        <button onclick="checkSentence()" class="mt-4 w-full bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs shadow hover:bg-amber-600 transition">
+                            Cek Susunan Kalimat
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function moveWord(btn) {
+            const target = document.getElementById('sentence-target');
+            const placeholder = document.getElementById('placeholder-text');
+            if (placeholder) placeholder.remove();
+
+            if (btn.parentElement.id === 'word-pool') {
+                target.appendChild(btn);
+            } else {
+                document.getElementById('word-pool').appendChild(btn);
+            }
+        }
+
+        function checkSentence() {
+            const words = Array.from(document.getElementById('sentence-target').children).map(c => c.innerText.trim());
+            const result = words.join(" ");
+            
+            if (result === "Hak dan kewajiban harus dilaksanakan seimbang" || result === "Hak dan kewajiban harus dilaksanakan") {
+                gameState.gameStats.correct++;
+                addXP(15);
+                confetti({ particleCount: 30 });
+                showModal("🎉 KALIMAT SEMPURNA!", "Kamu berhasil menyusun prinsip utama keseimbangan! +15 XP", "Mantap");
+                switchTab('games');
+            } else {
+                showModal("💡 SUSUNAN BELUM TEPAT", "Coba urutkan kembali menjadi kalimat norma yang logis!", "Coba Lagi");
+            }
+        }
+
+        // GAME 6: KUIS CEPAT
+        function playKuisCepat() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-red-800 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">⏱️ KUIS CEPAT PACU WAKTU</span>
+                        <span class="bg-red-600 text-red-100 text-[10px] font-bold px-2 py-0.5 rounded-full">10 Detik</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                            <span>Soal 1/1</span>
+                            <span class="text-red-600 font-extrabold text-sm" id="quiz-timer">⏱️ 10s</span>
+                        </div>
+                        <p class="text-xs font-bold text-slate-800">
+                            Manakah yang merupakan kewajiban utama seorang warga negara dalam kaitannya dengan hukum di Indonesia?
+                        </p>
+                        <div class="flex flex-col gap-2 mt-2">
+                            <button onclick="checkKuis(true)" class="p-3 text-left bg-slate-50 border border-slate-200 hover:border-red-500 rounded-xl text-xs font-semibold text-slate-700">
+                                Menjunjung tinggi hukum dan pemerintahan tanpa ada kecualinya.
+                            </button>
+                            <button onclick="checkKuis(false)" class="p-3 text-left bg-slate-50 border border-slate-200 hover:border-red-500 rounded-xl text-xs font-semibold text-slate-700">
+                                Mematuhi hukum hanya jika ada petugas kepolisian.
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkKuis(isCorrect) {
+            if (isCorrect) {
+                gameState.gameStats.correct++;
+                addXP(20);
+                confetti({ particleCount: 30 });
+                showModal("⚡ KILAT DAN TEPAT!", "Jawabanmu benar berdasarkan Pasal 27 ayat (1) UUD 1945. +20 XP", "Lanjut");
+            } else {
+                gameState.gameStats.wrong++;
+                saveState();
+                showModal("❌ KURANG TEPAT", "Warga negara wajib menjunjung tinggi hukum tanpa kecuali.", "Lanjut");
+            }
+            switchTab('games');
+        }
+
+        // GAME 7: TEKA TEKI SILANG (TTS)
+        function playTTS() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col gap-3 py-1">
+                    <div class="bg-teal-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow">
+                        <span class="font-extrabold text-xs">✏️ TEKA-TEKI SILANG MINI</span>
+                        <span class="bg-teal-700 text-teal-200 text-[10px] font-bold px-2 py-0.5 rounded-full">+25 XP</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center gap-3">
+                        <p class="text-xs text-slate-600 text-center"><b>Mendatar (3 Huruf):</b> Sesuatu yang semestinya diterima oleh setiap individu secara hukum.</p>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="tts-1" maxlength="1" class="w-12 h-12 text-center text-lg font-extrabold border-2 border-teal-500 rounded-xl uppercase focus:ring-2 focus:ring-teal-400">
+                            <input type="text" id="tts-2" maxlength="1" class="w-12 h-12 text-center text-lg font-extrabold border-2 border-teal-500 rounded-xl uppercase focus:ring-2 focus:ring-teal-400">
+                            <input type="text" id="tts-3" maxlength="1" class="w-12 h-12 text-center text-lg font-extrabold border-2 border-teal-500 rounded-xl uppercase focus:ring-2 focus:ring-teal-400">
+                        </div>
+
+                        <button onclick="checkTTS()" class="w-full bg-teal-600 text-white font-bold py-2.5 rounded-xl text-xs shadow hover:bg-teal-700 transition mt-2">
+                            Cek Jawaban TTS
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkTTS() {
+            const c1 = document.getElementById('tts-1').value.toUpperCase();
+            const c2 = document.getElementById('tts-2').value.toUpperCase();
+            const c3 = document.getElementById('tts-3').value.toUpperCase();
+
+            if (c1 === 'H' && c2 === 'A' && c3 === 'K') {
+                gameState.gameStats.correct++;
+                addXP(25);
+                confetti({ particleCount: 40 });
+                showModal("🎉 TTS TERJAWAB!", "Kata <b>HAK</b> benar sempurna! +25 XP", "Mantap");
+                switchTab('games');
+            } else {
+                showModal("💡 KURANG TEPAT", "Petunjuk: H _ K", "Coba Lagi");
+            }
+        }
+
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+        function showModal(title, bodyText, btnText) {
+            const container = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <h3 class="font-extrabold text-base text-slate-800">${title}</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">${bodyText}</p>
+                <button onclick="closeModal()" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-xl text-xs shadow hover:bg-red-700 transition mt-2">
+                    ${btnText}
+                </button>
+            `;
+            container.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        // INITIALIZATION
+        window.onload = function() {
+            loadState();
+            renderHome();
+        };
+    </script>
+</body>
+</html>
